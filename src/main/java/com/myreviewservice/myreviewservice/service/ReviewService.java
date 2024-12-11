@@ -7,9 +7,11 @@ import com.myreviewservice.myreviewservice.entity.Review;
 import com.myreviewservice.myreviewservice.exception.MyReviewServiceException;
 import com.myreviewservice.myreviewservice.repository.ProductRepository;
 import com.myreviewservice.myreviewservice.repository.ReviewRepository;
+import com.myreviewservice.myreviewservice.util.DummyS3Uploader;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.multipart.MultipartFile;
 
 import static com.myreviewservice.myreviewservice.exception.MyReviewServiceErrorCode.*;
 
@@ -18,9 +20,10 @@ import static com.myreviewservice.myreviewservice.exception.MyReviewServiceError
 public class ReviewService {
     private final ReviewRepository reviewRepository;
     private final ProductRepository productRepository;
+    private final DummyS3Uploader dummyS3Uploader;
 
     @Transactional
-    public void addReview(Long productId, ReviewRequestDto requestDto) {
+    public void addReview(Long productId, ReviewRequestDto requestDto, MultipartFile image) {
         //상품이 존재하는지 확인(없으면 예외처리)
         Product product = productRepository.findById(productId).orElseThrow(()->new MyReviewServiceException(NO_PRODUCT));
 
@@ -28,13 +31,17 @@ public class ReviewService {
         boolean hasReview = reviewRepository.existsByProductAndUserId(product, requestDto.getUserId());
         if(hasReview) throw new MyReviewServiceException(DUPLICATED_REVIEW);
 
+        // 이미지 파일 처리(더미 S3 구현체)
+        String imageUrl = null;
+        if(image!=null && !image.isEmpty()) imageUrl = dummyS3Uploader.upload(image);
+
         //리뷰 저장
         Review review = Review.builder()
                 .product(product)
                 .userId(requestDto.getUserId())
                 .score(requestDto.getScore())
                 .content(requestDto.getContent())
-                .imageUrl(requestDto.getImageUrl())
+                .imageUrl(imageUrl)
                 .build();
         reviewRepository.save(review);
 
