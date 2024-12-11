@@ -19,8 +19,8 @@ public class ReviewResponseDto {
     private List<ReviewDetailDto> reviews; //리뷰 목록
 
     public static class ReviewDetailDto{
-        private BigInteger reviewId;
-        private BigInteger userId;
+        private Long reviewId;
+        private Long userId;
         private int score;
         private String content;
         private String imageUrl;

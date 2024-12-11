@@ -11,7 +11,7 @@ import java.math.BigInteger;
 @NoArgsConstructor
 @AllArgsConstructor
 public class ReviewRequestDto {
-    private BigInteger productId; //상품 ID
+    private Long productId; //상품 ID
     private String userid;
     private int score;
     private String content;

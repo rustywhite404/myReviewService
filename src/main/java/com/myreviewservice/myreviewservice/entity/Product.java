@@ -24,10 +24,10 @@ public class Product {
 
     @Column(length = 20, nullable = false)
     @ColumnDefault("0")
-    private BigInteger reviewCount;
+    private Long reviewCount;
 
     @Column(nullable = false)
-    @ColumnDefault("0")
+    @ColumnDefault("0.0")
     private Float score;
 
     //상품에 여러 리뷰가 연결될 수 있으므로 1:N
