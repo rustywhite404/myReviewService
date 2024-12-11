@@ -20,7 +20,7 @@
 
 3. DB 스키마 myReviewService는 컨테이너가 시작될 때 자동으로 생성됩니다.   
  
-4. 애플리케이션은 http://localhost:8080에서 실행됩니다. 
+4. 애플리케이션은 http://localhost:8080 에서 실행됩니다. 
 
 ---
 
