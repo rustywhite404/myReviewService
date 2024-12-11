@@ -1,8 +1,11 @@
 package com.myreviewservice.myreviewservice.entity;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import jakarta.persistence.*;
 import lombok.*;
 import org.springframework.data.annotation.CreatedDate;
+import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
 import java.math.BigInteger;
 import java.time.LocalDateTime;
@@ -14,12 +17,13 @@ import java.time.LocalDateTime;
 @ToString
 @Builder
 @Entity
+@EntityListeners(AuditingEntityListener.class)
 public class Review {
     @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private BigInteger id;
+    private BigInteger reviewId;
 
     @Column(nullable = false)
-    private String userid;
+    private BigInteger userId;
 
     @Column(nullable = false)
     private int score;
@@ -32,12 +36,13 @@ public class Review {
 
     @CreatedDate
     @Column(updatable = false)
-    @Temporal(TemporalType.TIMESTAMP)
     private LocalDateTime createdAt;
 
     //리뷰는 하나의 상품에 속한다.
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "product_id")
+    @JsonProperty("id")
+    @JsonIgnore // 무한 참조 방지
     private Product product;
 
 }
