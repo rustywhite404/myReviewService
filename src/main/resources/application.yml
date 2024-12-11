@@ -4,8 +4,8 @@ spring:
       file: docker-compose.yml
   datasource:
     url: jdbc:mysql://localhost:3308/myReviewService
-    username: root
-    password: 1234
+    username: ${DB_USERNAME}
+    password: ${DB_PASSWORD}
     driver-class-name: com.mysql.cj.jdbc.Driver
   jpa:
     hibernate:
