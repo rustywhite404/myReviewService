@@ -18,7 +18,7 @@ public class DataInitializer implements CommandLineRunner {
             for(int i=0;i<10;i++) {
                 productRepository.save(Product.builder()
                         .reviewCount(0L)
-                        .score(0.0f).build());
+                        .score(0.0).build());
             }
         }
     }
