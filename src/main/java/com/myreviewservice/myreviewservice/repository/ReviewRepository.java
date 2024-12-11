@@ -10,9 +10,10 @@ import org.springframework.data.repository.query.Param;
 import java.util.Collection;
 
 public interface ReviewRepository extends JpaRepository<Review, Long> {
+    String FIND_DTO = " new com.myreviewservice.myreviewservice.dto.";
     boolean existsByProductAndUserId(Product product, Long userid);
 
-    @Query("SELECT new com.myreviewservice.myreviewservice.dto.ReviewStatsDto(COUNT(r), AVG(r.score)) " +
+    @Query("SELECT"+FIND_DTO+"ReviewStatsDto(COUNT(r), AVG(r.score)) " +
             "FROM Review r WHERE r.product = :product")
     ReviewStatsDto findReviewStatsByProduct(@Param("product") Product product);
 }
