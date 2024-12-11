@@ -15,11 +15,12 @@ import java.util.List;
 @ToString
 @Builder
 @Entity
+@Table(name = "product")
 public class Product {
 
     @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(length = 20)
-    private BigInteger id;
+    private Long id;
 
     @Column(length = 20, nullable = false)
     @ColumnDefault("0")

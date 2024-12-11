@@ -17,13 +17,14 @@ import java.time.LocalDateTime;
 @ToString
 @Builder
 @Entity
+@Table(name = "review")
 @EntityListeners(AuditingEntityListener.class)
 public class Review {
     @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private BigInteger reviewId;
+    private Long reviewId;
 
     @Column(nullable = false)
-    private BigInteger userId;
+    private Long userId;
 
     @Column(nullable = false)
     private int score;
