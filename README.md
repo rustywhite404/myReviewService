@@ -6,7 +6,14 @@
    git clone https://github.com/rustywhite404/myReviewService.git
    cd myReviewService  
    
-2. **Docker Compose로 MySQL 컨테이너 실행**  
+2. 루트 경로에 `.env` 파일을 생성하여 DB 접속정보 등의 민감한 정보를 설정해주세요.  
+설정해야 하는 항목은 아래와 같습니다.  
+   ```env
+   DB_USERNAME={ROOT USERNAME}
+   DB_PASSWORD={ROOT PASSWORD}
+   MYSQL_ROOT_PASSWORD={ROOT PASSWORD}
+
+3. **Docker Compose로 MySQL 컨테이너 실행**  
 프로젝트의 docker-compose.yml 파일이 위치한 경로에서 아래 명령어를 입력해주세요. 
    ```bash
    docker-compose up --build -d
