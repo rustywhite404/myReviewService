@@ -1,0 +1,16 @@
+spring:
+  docker:
+    compose:
+      file: docker-compose.yml
+  datasource:
+    url: jdbc:mysql://localhost:3308/myReviewService
+    username: root
+    password: 1234
+    driver-class-name: com.mysql.cj.jdbc.Driver
+  jpa:
+    hibernate:
+      ddl-auto: update
+    show-sql: true
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.MySQLDialect

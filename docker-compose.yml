@@ -1,0 +1,17 @@
+version: "2.29"
+services:
+  app:
+    build: .
+    ports:
+      - "8080:8080"
+    depends_on:
+      - db       # db 서비스가 먼저 실행된 후 app 실행
+  db:
+    image: mysql:8.0
+    environment: # MySQL 환경 변수 설정
+      MYSQL_ROOT_PASSWORD: 1234
+      MYSQL_DATABASE: root
+    ports:
+      - "3308:3306" #3306이 이미 로컬 mysql에서 사용중이므로 3308 사용
+    volumes:
+      - ./init-scripts:/docker-entrypoint-initdb.d
