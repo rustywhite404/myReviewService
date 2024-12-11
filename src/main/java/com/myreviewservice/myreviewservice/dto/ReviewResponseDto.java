@@ -1,9 +1,6 @@
 package com.myreviewservice.myreviewservice.dto;
 
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+import lombok.*;
 
 import java.math.BigInteger;
 import java.util.List;
@@ -12,6 +9,7 @@ import java.util.List;
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
+@ToString
 public class ReviewResponseDto {
     private Long totalCount; //해당 상품에 작성된 총 리뷰 수
     private Float score; //평균점수

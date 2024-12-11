@@ -4,7 +4,6 @@ import jakarta.persistence.*;
 import lombok.*;
 import org.hibernate.annotations.ColumnDefault;
 
-import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -28,7 +27,7 @@ public class Product {
 
     @Column(nullable = false)
     @ColumnDefault("0.0")
-    private Float score;
+    private Double score;
 
     //상품에 여러 리뷰가 연결될 수 있으므로 1:N
     @OneToMany(mappedBy = "product", cascade = CascadeType.ALL, orphanRemoval = true)
