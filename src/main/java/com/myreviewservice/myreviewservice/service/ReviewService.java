@@ -1,6 +1,7 @@
 package com.myreviewservice.myreviewservice.service;
 
 import com.myreviewservice.myreviewservice.dto.ReviewRequestDto;
+import com.myreviewservice.myreviewservice.dto.ReviewResponseDto;
 import com.myreviewservice.myreviewservice.dto.ReviewStatsDto;
 import com.myreviewservice.myreviewservice.entity.Product;
 import com.myreviewservice.myreviewservice.entity.Review;
@@ -9,9 +10,18 @@ import com.myreviewservice.myreviewservice.repository.ProductRepository;
 import com.myreviewservice.myreviewservice.repository.ReviewRepository;
 import com.myreviewservice.myreviewservice.util.DummyS3Uploader;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Optional;
+import java.util.stream.Collectors;
 
 import static com.myreviewservice.myreviewservice.exception.MyReviewServiceErrorCode.*;
 
@@ -63,4 +73,21 @@ public class ReviewService {
 
     }
 
+    public List<ReviewResponseDto> getReviews(Long productId, int cursor, int size) {
+        //상품이 존재하는지 확인(없으면 예외처리)
+        Product product = productRepository.findById(productId).orElseThrow(()->new MyReviewServiceException(NO_PRODUCT));
+
+        Pageable pageable = PageRequest.of(cursor, size, Sort.by("id").descending());
+        //해당 상품번호의 리뷰 전체 조회
+        Page<Review> page = reviewRepository.findByProductId(productId, pageable);
+        if(page.isEmpty()){
+            throw new MyReviewServiceException(NO_REVIEWS);
+        }
+
+        // Page<Review> -> List<ReviewResponseDto>
+        return page.getContent().stream()
+                .map(review -> new ReviewResponseDto(
+                        product,cursor,List.of(new ReviewResponseDto.ReviewDetailDto(review))
+                )).collect(Collectors.toList());
+    }
 }

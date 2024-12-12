@@ -21,7 +21,7 @@ import java.time.LocalDateTime;
 @EntityListeners(AuditingEntityListener.class)
 public class Review {
     @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long reviewId;
+    private Long id;
 
     @Column(nullable = false)
     private Long userId;
@@ -42,7 +42,6 @@ public class Review {
     //리뷰는 하나의 상품에 속한다.
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "product_id")
-    @JsonProperty("id")
     @JsonIgnore // 무한 참조 방지
     private Product product;
 
