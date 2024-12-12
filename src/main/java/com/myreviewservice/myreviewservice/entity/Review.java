@@ -41,6 +41,9 @@ public class Review {
     @Column(updatable = false)
     private LocalDateTime createdAt;
 
+    @Version
+    private Long version;
+
     //리뷰는 하나의 상품에 속한다.
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "product_id")

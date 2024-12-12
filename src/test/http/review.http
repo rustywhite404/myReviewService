@@ -18,7 +18,7 @@ Content-Type: image/jpeg
 ------boundary--
 
 ### 리뷰 등록 API(이미지 포함 등록)
-POST http://localhost:8080/products/2/reviews
+POST http://localhost:8080/products/3/reviews
 Content-Type: multipart/form-data; boundary=----boundary
 
 ------boundary
@@ -26,9 +26,9 @@ Content-Disposition: form-data; name="review"
 Content-Type: application/json
 
 {
-  "userId": 84,
+  "userId": 88,
   "score": 3,
-  "content": "무난하게 쓸 수 있어요."
+  "content": "잘모르겠어용 쏘쏘해요"
 }
 ------boundary
 Content-Disposition: form-data; name="image";  filename="test1.jpg";

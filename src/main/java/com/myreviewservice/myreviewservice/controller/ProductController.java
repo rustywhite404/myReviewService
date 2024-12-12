@@ -26,7 +26,7 @@ public class ProductController {
     private final ReviewService reviewService;
 
     @PostMapping(value = "/{productId}/reviews", consumes = {MediaType.MULTIPART_FORM_DATA_VALUE, MediaType.APPLICATION_OCTET_STREAM_VALUE})
-    public void createReview(@PathVariable Long productId, @RequestPart("review") @Valid ReviewRequestDto requestDto,
+    public void createReview(@PathVariable("productId") Long productId, @RequestPart("review") @Valid ReviewRequestDto requestDto,
                              @RequestPart(value = "image", required = false) MultipartFile image) {
         log.info("productId: {}, RequestDto: {}, Image: {}", productId, requestDto, image != null ? image.getOriginalFilename() : "No Image");
         reviewService.addReview(productId, requestDto, image);

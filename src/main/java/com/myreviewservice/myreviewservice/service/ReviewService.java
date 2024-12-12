@@ -10,7 +10,9 @@ import com.myreviewservice.myreviewservice.exception.MyReviewServiceException;
 import com.myreviewservice.myreviewservice.repository.ProductRepository;
 import com.myreviewservice.myreviewservice.repository.ReviewRepository;
 import com.myreviewservice.myreviewservice.util.DummyS3Uploader;
+import jakarta.persistence.OptimisticLockException;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -24,6 +26,7 @@ import java.util.stream.Collectors;
 
 import static com.myreviewservice.myreviewservice.exception.MyReviewServiceErrorCode.*;
 
+@Slf4j
 @RequiredArgsConstructor
 @Service
 public class ReviewService {
@@ -32,7 +35,7 @@ public class ReviewService {
     private final DummyS3Uploader dummyS3Uploader;
 
     @Transactional
-    public void addReview(Long productId, ReviewRequestDto requestDto, MultipartFile image) {
+    public void addReview(Long productId, ReviewRequestDto requestDto, MultipartFile image){
         //상품이 존재하는지 확인(없으면 예외처리)
         Product product = productRepository.findById(productId).orElseThrow(() -> new MyReviewServiceException(NO_PRODUCT));
 
@@ -54,21 +57,32 @@ public class ReviewService {
                 .build();
         reviewRepository.save(review);
 
-        //리뷰를 받은 상품의 리뷰 수 증가 + 평점 재계산
-        updateReviewCountAndAverageScore(product);
+        //리뷰를 받은 상품의 리뷰 수 증가 + 평점 재계산(Optimistic Lock 적용)
+        updateReviewCountAndAverageScoreWithLock(product);
 
     }
 
-    private void updateReviewCountAndAverageScore(Product product) {
-        //단일책임원칙에 따라 ReviewCount와 AverageScore를 각각 메서드로 만들까 고민해보았는데
-        //어차피 항상 같이 변경되는 기능이고, 데이터가 많이 쌓이는 테이블이라면 한 번 조회해서 결과를 이용하는 게 성능이 최적화 될 것 같아서 합침.
+    //동시성을 고려하여 리뷰 등록 및 평점 업데이트
+    public void updateReviewCountAndAverageScoreWithLock(Product product){
+        int retryCount = 0;
+        final int maxRetry = 100;
+        while (retryCount<maxRetry){ //재시도 횟수를 제한해 무한루프 방지
+            try {
+                updateReviewCountAndAverageScore(product);
+                break; //정상 작동하면 메서드 종료
+            }catch (OptimisticLockException e){
+                retryCount++;
+                log.warn("OptimisticLockException 발생 - 재시도 횟수: {}", retryCount);
+                if(retryCount >= maxRetry) throw new MyReviewServiceException(MyReviewServiceErrorCode.INTERNAL_SERVER_ERROR);
 
-        //리뷰 개수와 평균 점수를 한번에 가져옴
-        ReviewStatsDto reviewStats = reviewRepository.findReviewStatsByProduct(product);
-
-        product.setReviewCount(reviewStats.getTotalCount());
-        product.setScore(reviewStats.getAverageScore());
-        productRepository.save(product);
+                try {
+                    Thread.sleep(50); //딜레이 후 재시도
+                }catch (InterruptedException ie){
+                    Thread.currentThread().interrupt(); // 현재 스레드의 인터럽트를 복원
+                    throw new MyReviewServiceException(MyReviewServiceErrorCode.INTERNAL_SERVER_ERROR, "재시도 중 문제가 발생했습니다.");
+                }
+            }
+        }
 
     }
 
@@ -103,4 +117,21 @@ public class ReviewService {
                 .reviews(reviewDetails)
                 .build();
     }
+
+    /**
+     * 상품의 리뷰 개수와 평균 평점을 Optimistic Lock을 사용해 업데이트
+     */
+    @Transactional
+    public void updateReviewCountAndAverageScore(Product product) {
+        //단일책임원칙에 따라 ReviewCount와 AverageScore를 각각 메서드로 만들까 고민해보았는데
+        //어차피 항상 같이 변경되는 기능이고, 데이터가 많이 쌓이는 테이블이라면 한 번 조회해서 결과를 이용하는 게 성능이 최적화 될 것 같아서 합침.
+
+        //리뷰 개수와 평균 점수를 한번에 가져옴
+        ReviewStatsDto reviewStats = reviewRepository.findReviewStatsByProduct(product);
+        product.setReviewCount(reviewStats.getTotalCount());
+        product.setScore(reviewStats.getAverageScore());
+        productRepository.save(product);
+
+    }
+
 }
