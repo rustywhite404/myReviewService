@@ -1,17 +1,30 @@
-version: "2.29"
+version: '3.8'
+
 services:
-  app:
-    build: .
-    ports:
-      - "8080:8080"
-    depends_on:
-      - db       # db 서비스가 먼저 실행된 후 app 실행
-  db:
+  mysql:
     image: mysql:8.0
-    environment: # MySQL 환경 변수 설정
-      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD}
-      MYSQL_DATABASE: myReviewService
+    container_name: mysql-container
+    restart: always
     ports:
-      - "3308:3306" #3306이 이미 로컬 mysql에서 사용중이므로 3308 사용
+      - "3308:3306" # 로컬 3308 포트를 컨테이너의 3306 포트로 매핑
+    environment:
+      MYSQL_ROOT_PASSWORD: 1234 # MySQL root 비밀번호
+      MYSQL_DATABASE: myReviewService # 생성할 데이터베이스 이름
     volumes:
-      - ./init-scripts:/docker-entrypoint-initdb.d
+      - mysql-data:/var/lib/mysql # MySQL 데이터 저장
+
+  spring:
+    image: my-review-service:latest # 빌드된 스프링 애플리케이션의 Docker 이미지
+    container_name: spring-container
+    restart: always
+    ports:
+      - "8081:8080" # 로컬 8081 포트를 컨테이너의 8080 포트로 매핑
+    depends_on:
+      - mysql # spring 서비스가 mysql 서비스에 의존
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:mysql://mysql:3306/myReviewService
+      SPRING_DATASOURCE_USERNAME: root
+      SPRING_DATASOURCE_PASSWORD: 1234
+
+volumes:
+  mysql-data:

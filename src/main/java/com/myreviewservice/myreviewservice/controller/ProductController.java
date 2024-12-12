@@ -1,6 +1,4 @@
 package com.myreviewservice.myreviewservice.controller;
-
-
 import com.myreviewservice.myreviewservice.dto.ReviewRequestDto;
 import com.myreviewservice.myreviewservice.dto.ReviewResponseDto;
 import com.myreviewservice.myreviewservice.service.ProductService;
@@ -8,13 +6,10 @@ import com.myreviewservice.myreviewservice.service.ReviewService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.data.domain.Page;
 import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
-import java.util.List;
-import java.util.Map;
 
 @Slf4j
 @RestController
@@ -33,7 +28,7 @@ public class ProductController {
     }
 
     @GetMapping(value = "/{productId}/reviews")
-    public ReviewResponseDto getReviews(@PathVariable Long productId,
+    public ReviewResponseDto getReviews(@PathVariable("productId") Long productId,
                                           @RequestParam(required = false, defaultValue = "0") int cursor,
                                           @RequestParam(required = false, defaultValue = "10") int size) {
         log.info("productId: {}, cursor: {}, size:{}", productId, cursor, size);
