@@ -6,6 +6,9 @@ import lombok.*;
 
 import java.math.BigInteger;
 import java.time.LocalDateTime;
+import java.time.ZoneId;
+import java.time.ZonedDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -40,7 +43,7 @@ public class ReviewResponseDto {
         private int score;
         private String content;
         private String imageUrl;
-        private LocalDateTime createdAt;
+        private String createdAt;
 
         public ReviewDetailDto(Review review) {
             this.Id = review.getId();
@@ -48,7 +51,10 @@ public class ReviewResponseDto {
             this.score = review.getScore();
             this.content = review.getContent();
             this.imageUrl = review.getImageUrl();
-            this.createdAt = review.getCreatedAt();
+            this.createdAt = review.getCreatedAt()
+                            .atZone(ZoneId.systemDefault()) //현재 시스템의 기본 시간대
+                            .withZoneSameInstant(ZoneId.of("UTC")) //UTC 시간대로 변환
+                            .format(DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'"));
         }
     }
 }
