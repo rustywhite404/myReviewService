@@ -79,10 +79,6 @@ public class ReviewService {
         Pageable pageable = PageRequest.of(cursor, size, Sort.by("createdAt").descending());
         //해당 상품번호의 리뷰 전체 조회
         Page<Review> page = reviewRepository.findByProductId(productId, pageable);
-        Map<String, Object> response = new HashMap<>();
-        response.put("totalCount", product.getReviewCount());
-        response.put("score", product.getScore().floatValue());
-        response.put("cursor", cursor);
 
         if (page.isEmpty()) {
             return ReviewResponseDto.builder()
