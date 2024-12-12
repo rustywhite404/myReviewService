@@ -15,4 +15,5 @@ public enum MyReviewServiceErrorCode {
     INVALID_REQUEST("잘못된 요청입니다");
 
     private final String message;
+
 }

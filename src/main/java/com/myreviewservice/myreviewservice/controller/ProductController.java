@@ -14,6 +14,7 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
+import java.util.Map;
 
 @Slf4j
 @RestController
@@ -32,9 +33,9 @@ public class ProductController {
     }
 
     @GetMapping(value = "/{productId}/reviews")
-    public List<ReviewResponseDto> getReviews(@PathVariable Long productId,
-                           @RequestParam(required = false, defaultValue = "0") int cursor,
-                           @RequestParam(required = false, defaultValue = "10") int size) {
+    public ReviewResponseDto getReviews(@PathVariable Long productId,
+                                          @RequestParam(required = false, defaultValue = "0") int cursor,
+                                          @RequestParam(required = false, defaultValue = "10") int size) {
         log.info("productId: {}, cursor: {}, size:{}", productId, cursor, size);
         return reviewService.getReviews(productId, cursor, size);
     }

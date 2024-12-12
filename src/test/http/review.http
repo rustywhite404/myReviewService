@@ -39,5 +39,5 @@ Content-Type: image/jpeg
 
 
 ### 리뷰 조회 API
-GET http://localhost:8080/products/2/reviews?cursor=0&size=2
+GET http://localhost:8080/products/1/reviews?cursor=0&size=2
 Accept: application/json
