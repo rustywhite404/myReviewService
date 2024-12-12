@@ -77,7 +77,7 @@ public class ReviewService {
         //상품이 존재하는지 확인(없으면 예외처리)
         Product product = productRepository.findById(productId).orElseThrow(()->new MyReviewServiceException(NO_PRODUCT));
 
-        Pageable pageable = PageRequest.of(cursor, size, Sort.by("id").descending());
+        Pageable pageable = PageRequest.of(cursor, size, Sort.by("createdAt").descending());
         //해당 상품번호의 리뷰 전체 조회
         Page<Review> page = reviewRepository.findByProductId(productId, pageable);
         if(page.isEmpty()){

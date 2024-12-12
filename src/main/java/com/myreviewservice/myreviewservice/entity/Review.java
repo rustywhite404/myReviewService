@@ -17,7 +17,9 @@ import java.time.LocalDateTime;
 @ToString
 @Builder
 @Entity
-@Table(name = "review")
+@Table(name = "review", indexes = {
+        @Index(name = "idx_review_product_id_created_at", columnList = "product_id, created_at DESC")
+})
 @EntityListeners(AuditingEntityListener.class)
 public class Review {
     @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
