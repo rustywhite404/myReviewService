@@ -1,23 +1,4 @@
 ### 리뷰 등록 API(이미지 없이 등록)
-POST http://localhost:8080/products/9/reviews
-Content-Type: multipart/form-data; boundary=----boundary
-
-------boundary
-Content-Disposition: form-data; name="review"
-Content-Type: application/json
-
-{
-  "userId": 3,
-  "score": 2,
-  "content": "최악이에요 괜히 샀어요."
-}
-------boundary
-Content-Disposition: form-data; name="image";
-Content-Type: image/jpeg
-
-------boundary--
-
-### 리뷰 등록 API(이미지 포함 등록)
 POST http://localhost:8080/products/3/reviews
 Content-Type: multipart/form-data; boundary=----boundary
 
@@ -26,9 +7,28 @@ Content-Disposition: form-data; name="review"
 Content-Type: application/json
 
 {
-  "userId": 88,
-  "score": 3,
-  "content": "잘모르겠어용 쏘쏘해요"
+  "userId": 668,
+  "score": 2,
+  "content": "나름 좋아요"
+}
+------boundary
+Content-Disposition: form-data; name="image";
+Content-Type: image/jpeg
+
+------boundary--
+
+### 리뷰 등록 API(이미지 포함 등록)
+POST http://localhost:8080/products/5/reviews
+Content-Type: multipart/form-data; boundary=----boundary
+
+------boundary
+Content-Disposition: form-data; name="review"
+Content-Type: application/json
+
+{
+  "userId": 111,
+  "score": 4,
+  "content": "진짜별로임!"
 }
 ------boundary
 Content-Disposition: form-data; name="image";  filename="test1.jpg";
@@ -39,5 +39,5 @@ Content-Type: image/jpeg
 
 
 ### 리뷰 조회 API
-GET http://localhost:8080/products/3/reviews?cursor=0&size=2
+GET http://localhost:8080/products/9/reviews?cursor=0&size=2
 Accept: application/json

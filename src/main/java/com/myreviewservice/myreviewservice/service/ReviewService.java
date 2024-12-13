@@ -13,6 +13,8 @@ import com.myreviewservice.myreviewservice.util.DummyS3Uploader;
 import jakarta.persistence.OptimisticLockException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.redisson.api.RLock;
+import org.redisson.api.RedissonClient;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -22,6 +24,7 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.util.*;
+import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
 import static com.myreviewservice.myreviewservice.exception.MyReviewServiceErrorCode.*;
@@ -33,9 +36,12 @@ public class ReviewService {
     private final ReviewRepository reviewRepository;
     private final ProductRepository productRepository;
     private final DummyS3Uploader dummyS3Uploader;
+    private final RedissonClient redissonClient;
+
+    private static final String REDIS_REVIEW_STATS_KEY = "product:reviewStats";
 
     @Transactional
-    public void addReview(Long productId, ReviewRequestDto requestDto, MultipartFile image){
+    public void addReview(Long productId, ReviewRequestDto requestDto, MultipartFile image) {
         //상품이 존재하는지 확인(없으면 예외처리)
         Product product = productRepository.findById(productId).orElseThrow(() -> new MyReviewServiceException(NO_PRODUCT));
 
@@ -57,33 +63,58 @@ public class ReviewService {
                 .build();
         reviewRepository.save(review);
 
-        //리뷰를 받은 상품의 리뷰 수 증가 + 평점 재계산(Optimistic Lock 적용)
-        updateReviewCountAndAverageScoreWithLock(product);
+        // Redis에 리뷰 수 및 총합 점수 업데이트
+        updateReviewStatsInRedis(productId, requestDto.getScore());
 
     }
 
-    //동시성을 고려하여 리뷰 등록 및 평점 업데이트
-    public void updateReviewCountAndAverageScoreWithLock(Product product){
-        int retryCount = 0;
-        final int maxRetry = 100;
-        while (retryCount<maxRetry){ //재시도 횟수를 제한해 무한루프 방지
-            try {
-                updateReviewCountAndAverageScore(product);
-                break; //정상 작동하면 메서드 종료
-            }catch (OptimisticLockException e){
-                retryCount++;
-                log.warn("OptimisticLockException 발생 - 재시도 횟수: {}", retryCount);
-                if(retryCount >= maxRetry) throw new MyReviewServiceException(MyReviewServiceErrorCode.INTERNAL_SERVER_ERROR);
+    private void updateReviewStatsInRedis(Long productId, int score) {
+        String key = REDIS_REVIEW_STATS_KEY;
+        RLock lock = redissonClient.getLock("lock:product:review:" + productId);
 
-                try {
-                    Thread.sleep(50); //딜레이 후 재시도
-                }catch (InterruptedException ie){
-                    Thread.currentThread().interrupt(); // 현재 스레드의 인터럽트를 복원
-                    throw new MyReviewServiceException(MyReviewServiceErrorCode.INTERNAL_SERVER_ERROR, "재시도 중 문제가 발생했습니다.");
-                }
+        try {
+            if (lock.tryLock(5, 10, TimeUnit.SECONDS)) {
+                // Redis에 리뷰 수 및 총합 점수 업데이트
+                Map<String, Long> reviewStats = redissonClient.getMap(key);
+                reviewStats.merge(productId + ":count", 1L, Long::sum); //리뷰 수 +1
+                reviewStats.merge(productId + ":sum", (long)score, Long::sum); //점수 합계 업데이트
+
+                // 동기화 상태 초기화
+                reviewStats.put(productId + ":synced", 0L); // 동기화 상태 초기화
+
+                log.info("Redis에 리뷰 데이터 업데이트: productId={}, count={}, sum={}", productId, reviewStats.get(productId + ":count"), reviewStats.get(productId + ":sum"));
+            }
+        } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
+            throw new MyReviewServiceException(MyReviewServiceErrorCode.REDIS_ROCK_ERROR);
+        } finally {
+            if (lock.isHeldByCurrentThread()) {
+                lock.unlock();
             }
         }
+    }
 
+    //동시성을 고려하여 리뷰 등록 및 평점 업데이트
+    public void updateReviewCountAndAverageScoreWithLock(Long productId) {
+        String lockKey = "product:lock:" + productId; //상품별 고유 락 키
+        RLock lock = redissonClient.getLock(lockKey);
+
+        try {
+            //락 최대 5초 대기, 락 획득 후 10초간 유지
+            if(lock.tryLock(5,10, TimeUnit.SECONDS)){
+                Product product = productRepository.findById(productId).orElseThrow(() -> new MyReviewServiceException(NO_PRODUCT));
+                updateReviewCountAndAverageScore(product);
+            }else {
+                throw new MyReviewServiceException(MyReviewServiceErrorCode.RESOURCE_LOCK_FAILURE);
+            }
+        }   catch (InterruptedException e) {
+            Thread.currentThread().interrupt(); // 인터럽트 상태 복원
+            throw new MyReviewServiceException(MyReviewServiceErrorCode.LOCK_ACQUISITION_ERROR);
+        }finally {
+            if (lock.isHeldByCurrentThread()) {
+                lock.unlock(); // 락 해제
+            }
+        }
     }
 
     public ReviewResponseDto getReviews(Long productId, int cursor, int size) {
