@@ -2,18 +2,22 @@ package com.myreviewservice.myreviewservice.config;
 
 import org.redisson.Redisson;
 import org.redisson.api.RedissonClient;
-import org.redisson.codec.JsonJacksonCodec;
 import org.redisson.config.Config;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
 @Configuration
 public class RedissonConfig {
+    @Value("${redis.address:redis://127.0.0.1:6379}")
+    private String redisAddress;
+
     @Bean
     public RedissonClient redissonClient() {
+        System.out.println("-----------reids-address check:"+redisAddress);
         Config config = new Config();
         config.useSingleServer()
-                .setAddress("redis://redis-container:6379") // Redis 서버 주소
+                .setAddress(redisAddress) // Redis 서버 주소
                 .setConnectionPoolSize(50) // 커넥션 풀 크기
                 .setConnectionMinimumIdleSize(10) // 최소 유휴 연결 수
                 .setRetryAttempts(3) // 재시도 횟수

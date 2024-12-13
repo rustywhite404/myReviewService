@@ -37,10 +37,11 @@ services:
     environment:
       SPRING_DATASOURCE_URL: jdbc:mysql://mysql:3306/myReviewService
       SPRING_DATASOURCE_USERNAME: root
-      SPRING_DATASOURCE_PASSWORD: 1234
-      SPRING_REDIS_HOST: redis # Redis 컨테이너 이름
-      SPRING_REDIS_PORT: 6379 # Redis 포트
-
+      SPRING_DATASOURCE_PASSWORD: ${MYSQL_ROOT_PASSWORD}
+      SPRING_REDIS_HOST: redis-container # Redis 컨테이너 이름
+      SPRING_REDIS_PORT: ${REDIS_PORT} # Redis 포트
+    env_file:
+      - prod.env
 volumes:
   mysql-data:
   redis-data:
