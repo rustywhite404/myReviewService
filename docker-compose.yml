@@ -18,7 +18,7 @@ services:
     container_name: redis-container
     restart: always
     ports:
-      - "6379:6379" # 로컬 6379 포트를 컨테이너의 6379 포트로 매핑
+      - "${REDIS_PORT}:6379" # 로컬 6379 포트를 컨테이너의 6379 포트로 매핑
     command: ["redis-server", "--appendonly", "yes"] # 영속성을 위한 AOF 설정
     volumes:
       - redis-data:/data # Redis 데이터 영속성
