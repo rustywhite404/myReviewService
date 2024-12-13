@@ -13,7 +13,7 @@ public class RedissonConfig {
     public RedissonClient redissonClient() {
         Config config = new Config();
         config.useSingleServer()
-                .setAddress("redis://127.0.0.1:6379") // Redis 서버 주소
+                .setAddress("redis://redis-container:6379") // Redis 서버 주소
                 .setConnectionPoolSize(50) // 커넥션 풀 크기
                 .setConnectionMinimumIdleSize(10) // 최소 유휴 연결 수
                 .setRetryAttempts(3) // 재시도 횟수

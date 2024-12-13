@@ -13,6 +13,16 @@ services:
     volumes:
       - mysql-data:/var/lib/mysql # MySQL 데이터 저장
 
+  redis:
+    image: redis:7.0
+    container_name: redis-container
+    restart: always
+    ports:
+      - "6379:6379" # 로컬 6379 포트를 컨테이너의 6379 포트로 매핑
+    command: ["redis-server", "--appendonly", "yes"] # 영속성을 위한 AOF 설정
+    volumes:
+      - redis-data:/data # Redis 데이터 영속성
+
   spring:
     image: my-review-service:latest # 빌드된 스프링 애플리케이션의 Docker 이미지
     container_name: spring-container
@@ -23,10 +33,14 @@ services:
       - "8081:8080" # 로컬 8081 포트를 컨테이너의 8080 포트로 매핑
     depends_on:
       - mysql # spring 서비스가 mysql 서비스에 의존
+      - redis # spring 서비스가 redis 서비스에 의존
     environment:
       SPRING_DATASOURCE_URL: jdbc:mysql://mysql:3306/myReviewService
       SPRING_DATASOURCE_USERNAME: root
       SPRING_DATASOURCE_PASSWORD: 1234
+      SPRING_REDIS_HOST: redis # Redis 컨테이너 이름
+      SPRING_REDIS_PORT: 6379 # Redis 포트
 
 volumes:
   mysql-data:
+  redis-data:
