@@ -1,5 +1,5 @@
 ### 리뷰 등록 API(이미지 없이 등록)
-POST http://localhost:8080/products/3/reviews
+POST http://localhost:8080/products/6/reviews
 Content-Type: multipart/form-data; boundary=----boundary
 
 ------boundary
@@ -18,7 +18,7 @@ Content-Type: image/jpeg
 ------boundary--
 
 ### 리뷰 등록 API(이미지 포함 등록)
-POST http://localhost:8080/products/5/reviews
+POST http://localhost:8080/products/6/reviews
 Content-Type: multipart/form-data; boundary=----boundary
 
 ------boundary

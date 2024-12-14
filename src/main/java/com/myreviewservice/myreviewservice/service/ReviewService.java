@@ -10,7 +10,6 @@ import com.myreviewservice.myreviewservice.exception.MyReviewServiceException;
 import com.myreviewservice.myreviewservice.repository.ProductRepository;
 import com.myreviewservice.myreviewservice.repository.ReviewRepository;
 import com.myreviewservice.myreviewservice.util.DummyS3Uploader;
-import jakarta.persistence.OptimisticLockException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.redisson.api.RLock;
