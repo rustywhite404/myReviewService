@@ -102,7 +102,8 @@
 
 </details>  
 
-## 📢 주요 구현 기능
+## 📝 기술적 고민 및 구현
+주요 구현 기능
 
 - 리뷰는 존재하는 상품에만 작성 가능
 - 리뷰는 '가장 최근에 작성된 리뷰' 순서대로 조회
@@ -247,6 +248,32 @@ public void addReview(Long productId, ReviewRequestDto requestDto, MultipartFile
        "errorMessage": "이 상품에 달린 리뷰가 존재하지 않습니다."
        }
        ```  
-     
----
 
+---
+- **테스트 코드 관리**  
+IDE 내부에서 테스트 진행과 관리가 가능하도록 Http Client를 이용하여 API 통합 테스트를 진행했다.  
+    ```java
+    ### 리뷰 등록 API(이미지 포함 등록)
+    POST http://localhost:8080/products/6/reviews
+    Content-Type: multipart/form-data; boundary=----boundary
+    
+    ------boundary
+    Content-Disposition: form-data; name="review"
+    Content-Type: application/json
+    
+    {
+      "userId": 111,
+      "score": 4,
+      "content": "진짜별로임!"
+    }
+    ------boundary
+    Content-Disposition: form-data; name="image";  filename="test1.jpg";
+    Content-Type: image/jpeg
+    
+    < C:\Users\user\Documents\test1.jpg
+    ------boundary--
+    
+    ### 리뷰 조회 API
+    GET http://localhost:8080/products/9/reviews?cursor=0&size=2
+    Accept: application/json
+    ```
